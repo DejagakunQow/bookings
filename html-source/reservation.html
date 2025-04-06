@@ -14,30 +14,7 @@
           href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.2/dist/css/datepicker-bs4.min.css">
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/notie/dist/notie.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.min.css">
-    <link rel="stylesheet" type="text/css" href="static/css/styles.css">
-
-    <style>
-        .btn-outline-secondary {
-            color: aqua;
-            border-color: #6c757d;
-        }
-
-        p {
-
-        }
-
-        .paraClass {
-            font-size: 3em;
-        }
-
-        .secondClass {
-            color: red;
-        }
-
-        #lastPara {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="working-html/static/css/styles.css">
 
 </head>
 
@@ -91,10 +68,10 @@
                     <div class="col">
                         <div class="row" id="reservation-dates">
                             <div class="col-md-6">
-                                <input required class="form-control" type="text" name="start" placeholder="Arrival">
+                                <input required class="form-control" type="text" id="start-date" name="start" placeholder="Arrival">
                             </div>
                             <div class="col-md-6">
-                                    <input required class="form-control" type="text" name="end" placeholder="Departure">
+                                <input required class="form-control" type="text" id="end-date" name="end" placeholder="Departure">
                             </div>
                         </div>
                     </div>
@@ -107,18 +84,6 @@
             </form>
         </div>
         <div class="col-md-3"></div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <p id="myParagraph">This is some text.</p>
-            <p class="paraClass secondClass">This is some text.</p>
-            <p class="paraClass">This is some text.</p>
-            <p id="lastPara">This is some text.</p>
-            <p>
-                <button id="colorButton" class="btn btn-outline-secondary">Click me</button>
-            </p>
-        </div>
     </div>
 
 </div>
@@ -151,7 +116,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.min.js"></script>
 
 <script>
-    let attention = Prompt();
+    const attention = Prompt();
 
     (function () {
         'use strict';
@@ -193,7 +158,7 @@
             title: 'Choose your dates',
             msg: html,
         });
-    })
+    });
 
     const elem = document.getElementById('reservation-dates');
     const rangePicker = new DateRangePicker(elem, {
@@ -204,7 +169,7 @@
         notie.alert({
             type: msgType,
             text: msg,
-        })
+        });
     }
 
     function notifyModal(title, text, icon, confirmationButtonText) {
@@ -213,16 +178,15 @@
             html: text,
             icon: icon,
             confirmButtonText: confirmationButtonText
-        })
+        });
     }
 
     function Prompt() {
         let toast = function (c) {
-            const{
+            const {
                 msg = '',
                 icon = 'success',
-                position = 'top-end',
-
+                position = 'top-end'
             } = c;
 
             const Toast = Swal.mixin({
@@ -231,93 +195,35 @@
                 position: position,
                 icon: icon,
                 showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            })
+                timer: 3000
+            });
+            Toast.fire({});
+        };
 
-            Toast.fire({})
-        }
-
-        let success = function (c) {
+        let custom = function (c) {
             const {
-                msg = "",
-                title = "",
-                footer = "",
-            } = c
-
-            Swal.fire({
-                icon: 'success',
-                title: title,
-                text: msg,
-                footer: footer,
-            })
-
-        }
-
-        let error = function (c) {
-            const {
-                msg = "",
-                title = "",
-                footer = "",
-            } = c
-
-            Swal.fire({
-                icon: 'error',
-                title: title,
-                text: msg,
-                footer: footer,
-            })
-
-        }
-
-        async function custom(c) {
-            const {
-                msg = "",
-                title = "",
+                title = '',
+                msg = '',
+                icon = '',
+                showConfirmButton = true
             } = c;
 
-            const { value: formValues } = await Swal.fire({
+            Swal.fire({
                 title: title,
                 html: msg,
+                icon: icon,
                 backdrop: false,
-                focusConfirm: false,
                 showCancelButton: true,
-                willOpen: () => {
-                    const elem = document.getElementById("reservation-dates-modal");
-                    const rp = new DateRangePicker(elem, {
-                        format: 'yyyy-mm-dd',
-                        showOnFocus: true,
-                    })
-                },
-                didOpen: () => {
-                    document.getElementById("start").removeAttribute("disabled");
-                    document.getElementById("end").removeAttribute("disabled");
-                },
-                preConfirm: () => {
-                    return [
-                        document.getElementById('start').value,
-                        document.getElementById('end').value
-                    ]
-                }
-            })
-
-            if (formValues) {
-                Swal.fire(JSON.stringify(formValues))
-            }
-        }
+                focusConfirm: false,
+                showConfirmButton: showConfirmButton
+            });
+        };
 
         return {
             toast: toast,
-            success: success,
-            error: error,
-            custom: custom,
+            custom: custom
         }
     }
-
 </script>
 
 </body>
