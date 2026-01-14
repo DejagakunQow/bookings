@@ -15,7 +15,7 @@ func routes(app *config.AppConfig) http.Handler {
 	// Middleware
 	mux.Use(middleware.Recoverer)
 	mux.Use(NoSurf)
-	mux.Use(SessionLoad)
+	mux.Use(SessionLoad(app))
 
 	// Static files
 	fileServer := http.FileServer(http.Dir("./static"))

@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 
+	"github.com/DejagakunQow/bookings/cmd/web/internal/driver"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 
 	"github.com/alexedwards/scs/v2"
@@ -19,4 +20,5 @@ type AppConfig struct {
 	Session       *scs.SessionManager
 	MailChan      chan models.MailData
 	UseTestDB     bool
+	DB            *driver.DB
 }
