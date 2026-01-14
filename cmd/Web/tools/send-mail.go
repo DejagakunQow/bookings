@@ -1,3 +1,5 @@
+//go:build tools
+
 package main
 
 import (
@@ -7,10 +9,19 @@ import (
 	"strings"
 	"time"
 
-	"bookings/cmd/web/internal/models"
-
+	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 	mail "github.com/xhit/go-simple-mail"
 )
+
+// dummy loggers for tool build
+var errorLog = log.New(log.Writer(), "ERROR\t", log.LstdFlags)
+
+// dummy app struct for tool build
+type application struct {
+	MailChan chan models.MailData
+}
+
+var app application
 
 func listenForMail() {
 	go func() {
@@ -40,12 +51,9 @@ func sendMsg(m models.MailData) {
 		AddTo(m.To).
 		SetSubject(m.Subject)
 
-	// CORRECT TEMPLATE LOGIC
 	if m.Template == "" {
-		// No template → send content directly
 		email.SetBody(mail.TextHTML, m.Content)
 	} else {
-		// Load template file
 		data, err := ioutil.ReadFile(fmt.Sprintf("../email-templates/%s", m.Template))
 		if err != nil {
 			errorLog.Println("Template read error:", err)
@@ -53,18 +61,15 @@ func sendMsg(m models.MailData) {
 		}
 
 		templateStr := string(data)
-
-		// Replace placeholder with your content
 		msgToSend := strings.Replace(templateStr, "[%body%]", m.Content, 1)
-
 		email.SetBody(mail.TextHTML, msgToSend)
 	}
 
-	// Send email
-	err = email.Send(client)
-	if err != nil {
+	if err := email.Send(client); err != nil {
 		errorLog.Println("Email send error:", err)
 	} else {
 		log.Println("Email sent successfully.")
 	}
 }
+
+func main() {}

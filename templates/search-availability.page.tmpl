@@ -1,0 +1,29 @@
+{{define "content"}}
+<div class="container mt-5">
+
+<h1>Search Availability</h1>
+
+<form action="/search-availability" method="post">
+
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+    <div class="form-group">
+        <label>Arrival Date</label>
+        <input type="date" name="start" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+        <label>Departure Date</label>
+        <input type="date" name="end" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">
+        Check Availability
+    </button>
+
+</form>
+
+</div>
+{{end}}
+
+{{template "base" .}}

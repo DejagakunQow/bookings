@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"bookings/cmd/web/internal/models"
+	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 )
 
 func (m *testDBRepo) AllUsers() bool {
@@ -14,9 +14,8 @@ func (m *testDBRepo) AllUsers() bool {
 
 // InsertReservation inserts a reservation into the database
 func (m *testDBRepo) InsertReservation(res models.Reservation) (int, error) {
-	// if the room id is 2, then fail; otherwise, pass
-	if res.RoomID == 2 {
-		return 0, errors.New("some error)")
+	if res.RoomID == 1000 {
+		return 0, errors.New("some error")
 	}
 	return 1, nil
 }
@@ -97,11 +96,10 @@ func (m *testDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]mode
 
 // GetRoomByID gets a room by id
 func (m *testDBRepo) GetRoomByID(id int) (models.Room, error) {
-	var room models.Room
-	if id > 2 {
-		return room, errors.New("some error")
-	}
-	return room, nil
+	return models.Room{
+		ID:       id,
+		RoomName: "Test Room",
+	}, nil
 }
 
 func (m *testDBRepo) GetUserByID(id int) (models.User, error) {
@@ -126,4 +124,48 @@ func (m *testDBRepo) AllReservations() ([]models.Reservation, error) {
 
 	return reservations, nil
 
+}
+
+// / AllReservations returns all reservations
+func (m *testDBRepo) AllNewReservations() ([]models.Reservation, error) {
+
+	var reservations []models.Reservation
+
+	return reservations, nil
+}
+
+func (m *testDBRepo) GetReservationByID(id int) (models.Reservation, error) {
+	var r models.Reservation
+	return r, nil
+}
+
+func (m *testDBRepo) UpdateReservation(u models.Reservation) error {
+
+	return nil
+}
+
+func (m *testDBRepo) DeleteReservation(id int) error {
+
+	return nil
+}
+
+func (m *testDBRepo) UpdateProcessedForReservation(id, processed int) error {
+	return nil
+}
+
+func (m *testDBRepo) IsRoomAvailable(roomID int, start, end time.Time) (bool, error) {
+	if roomID == 1000 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (m *testDBRepo) AllReservationsForDate(date time.Time) ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	return reservations, nil
+}
+
+func (m *testDBRepo) AllRooms() ([]models.Room, error) {
+	var rooms []models.Room
+	return rooms, nil
 }

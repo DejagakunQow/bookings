@@ -3,7 +3,7 @@ package repository
 import (
 	"time"
 
-	"bookings/cmd/web/internal/models"
+	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 )
 
 type DatabaseRepo interface {
@@ -20,4 +20,12 @@ type DatabaseRepo interface {
 	Authenticate(email, testPassword string) (int, string, error)
 
 	AllReservations() ([]models.Reservation, error)
+	AllNewReservations() ([]models.Reservation, error)
+
+	GetReservationByID(id int) (models.Reservation, error)
+	UpdateReservation(u models.Reservation) error
+	DeleteReservation(id int) error
+	AllReservationsForDate(date time.Time) ([]models.Reservation, error)
+	UpdateProcessedForReservation(id, processed int) error
+	IsRoomAvailable(roomID int, start, end time.Time) (bool, error)
 }
