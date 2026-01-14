@@ -1,167 +1,97 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"database/sql"
+	"encoding/gob"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
-	"encoding/gob"
+	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/driver"
-	"github.com/DejagakunQow/bookings/cmd/web/internal/handlers"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/helpers"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/render"
-
-	"github.com/alexedwards/scs/v2"
 )
 
-const portNumber = ":8080"
-
 var app config.AppConfig
-var session *scs.SessionManager
 
 func main() {
+	// ------------------------------------------------
+	// Register types for sessions
+	// ------------------------------------------------
+	registerGOB()
 
-	gob.Register(models.Reservation{})
-	gob.Register(models.Room{})
-	gob.Register(models.User{})
-	gob.Register(models.Restriction{})
-	gob.Register(map[string]int{})
-
-	// production flag
-	app.InProduction = false
-
-	// session setup
-	session = scs.New()
-	session.Lifetime = 24 * time.Hour
-	session.Cookie.Persist = true
-	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = app.InProduction
-	app.Session = session
-
-	helpers.NewHelpers(&app)
-
-	// -----------------------------
-	// DATABASE CONNECTION (FIX)
-	// -----------------------------
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
+	// ------------------------------------------------
+	// Load environment variables
+	// ------------------------------------------------
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
 		log.Fatal("DATABASE_URL is not set")
 	}
 
-	db, err := driver.ConnectSQL(dbURL)
-
+	// ------------------------------------------------
+	// Connect to database
+	// ------------------------------------------------
+	db, err := connectDB(dsn)
 	if err != nil {
-		log.Fatal("cannot connect to database:", err)
+		log.Fatal(err)
 	}
 	defer db.SQL.Close()
 
-	// -----------------------------
-	// TEMPLATE CACHE
-	// -----------------------------
-	tc, err := render.CreateTemplateCache()
-	if err != nil {
-		log.Fatal("cannot create template cache:", err)
-	}
-	app.TemplateCache = tc
-	app.UseCache = false
-
-	// -----------------------------
-	// REPOSITORIES & RENDERER
-	// -----------------------------
-
-	repo := handlers.NewRepo(&app, db)
-	handlers.NewHandlers(repo)
+	// ------------------------------------------------
+	// App configuration
+	// ------------------------------------------------
+	app.InProduction = os.Getenv("GO_ENV") == "production"
+	app.DB = db
 
 	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
 
-	// -----------------------------
-	// HTTP SERVER
-	// -----------------------------
-	fmt.Printf("Starting application on port %s\n", port)
+	// ------------------------------------------------
+	// HTTP server
+	// ------------------------------------------------
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: routes(&app),
 	}
 
+	log.Println("Starting server on port", port)
 	err = srv.ListenAndServe()
-	log.Fatal(err)
-
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func run() (*driver.DB, error) {
+// ------------------------------------------------
+// Helper functions (package-level ONLY)
+// ------------------------------------------------
 
+func registerGOB() {
 	gob.Register(models.Reservation{})
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
 	gob.Register(map[string]int{})
+}
 
-	inProduction := flag.Bool("production", true, "Application is in production")
-	useCache := flag.Bool("cache", true, "Use template cache")
-	dbname := flag.String("dbname", "", "Database name")
-	dbuser := flag.String("dbuser", "", "Database user")
-	dbhost := flag.String("dbhost", "localhost", "Database host")
-	dbport := flag.String("dbport", "5432", "Database port")
-	dbpass := flag.String("dbpass", "", "Database password")
-	dbSSL := flag.String("dbssl", "disable", "Database SSL settings(disable, prefer, require)")
-
-	flag.Parse()
-
-	if *dbname == "" || *dbuser == "" {
-		fmt.Println("Missing required flags - dbname and dbuser")
-		os.Exit(1)
-	}
-
-	mailChan := make(chan models.MailData)
-	app.MailChan = mailChan
-
-	app.InProduction = *inProduction
-	app.UseCache = *useCache
-
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	app.InfoLog = infoLog
-
-	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	app.ErrorLog = errorLog
-
-	session = scs.New()
-	session.Lifetime = 24 * time.Hour
-	session.Cookie.Persist = true
-	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = app.InProduction
-
-	app.Session = session
-
-	log.Println("Connecting to database...")
-	connectionString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", *dbhost, *dbport, *dbname, *dbuser, *dbpass, *dbSSL)
-	db, err := driver.ConnectSQL(connectionString)
+func connectDB(dsn string) (*driver.DB, error) {
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
-		log.Fatal("Cannot connect to database! Dying...")
-	}
-	log.Println("Connected to database!")
-
-	tc, err := render.CreateTemplateCache()
-	if err != nil {
-		log.Fatal("Cannot create template cache")
 		return nil, err
 	}
 
-	app.TemplateCache = tc
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
 
-	repo := handlers.NewRepo(&app, db)
-	handlers.NewHandlers(repo)
-
-	render.NewRenderer(&app)
-	helpers.NewHelpers(&app)
-
-	return db, nil
-
+	return &driver.DB{SQL: db}, nil
 }

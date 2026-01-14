@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/justinas/nosurf"
 )
 
@@ -29,6 +30,8 @@ func NoSurf(next http.Handler) http.Handler {
 }
 
 // SessionLoad loads and saves the session on every request
-func SessionLoad(next http.Handler) http.Handler {
-	return session.LoadAndSave(next)
+func SessionLoad(app *config.AppConfig) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return app.Session.LoadAndSave(next)
+	}
 }
