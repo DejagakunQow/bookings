@@ -1,1 +1,8 @@
 .idea
+# Go binaries
+*.exe
+*.out
+*.bin
+
+# Build artifacts
+cmd/web/web
