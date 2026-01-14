@@ -1,0 +1,164 @@
+{{define "page-title"}}
+Reservations
+{{end}}
+
+{{define "content"}}
+
+{{$src := index .StringMap "src"}}
+
+<div class="col-md-12">
+
+    <p>
+        <strong>Arrival:</strong> {{ .Reservation.StartDate | humanDate }} |
+        <strong>Departure:</strong> {{ .Reservation.EndDate | humanDate }} |
+        <strong>Room ID:</strong> {{ .Reservation.RoomID }}
+    </p>
+
+    <form id="reservationForm" action="/admin/reservations/{{$src}}/{{ .Reservation.ID }}" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+        <div class="form-group mt-3">
+            <label for="first_name">First Name:</label>
+            {{with .Form.Errors.Get "first_name"}}
+                <label class="text-danger">{{.}}</label>
+            {{end}}
+            <input class="form-control {{with .Form.Errors.Get "first_name"}} is-invalid {{end}}"
+                   id="first_name" autocomplete="off" type="text"
+                   name="first_name" value="{{ .Reservation.FirstName }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="last_name">Last Name:</label>
+            {{with .Form.Errors.Get "last_name"}}
+                <label class="text-danger">{{.}}</label>
+            {{end}}
+            <input class="form-control {{with .Form.Errors.Get "last_name"}} is-invalid {{end}}"
+                   id="last_name" autocomplete="off" type="text"
+                   name="last_name" value="{{ .Reservation.LastName }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            {{with .Form.Errors.Get "email"}}
+                <label class="text-danger">{{.}}</label>
+            {{end}}
+            <input class="form-control {{with .Form.Errors.Get "email"}} is-invalid {{end}}"
+                   id="email" autocomplete="off" type="email"
+                   name="email" value="{{ .Reservation.Email }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            {{with .Form.Errors.Get "phone"}}
+                <label class="text-danger">{{.}}</label>
+            {{end}}
+            <input class="form-control {{with .Form.Errors.Get "phone"}} is-invalid {{end}}"
+                   id="phone" autocomplete="off" type="text"
+                   name="phone" value="{{ .Reservation.Phone }}" required>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between mt-4">
+
+            <div>
+                <button id="saveBtn" type="button" class="btn btn-primary" onclick="confirmSave()">
+                    Save
+                </button>
+
+                <a href="/admin/reservations-{{$src}}" class="btn btn-secondary">
+                    Cancel
+                </a>
+
+                <a href="#!" class="btn btn-info" onclick="processRes({{.Reservation.ID}})">
+                    Mark as Processed
+                </a>
+            </div>
+
+            <div>
+                <button id="deleteBtn" type="button" class="btn btn-danger" onclick="confirmDelete({{.Reservation.ID}})">
+                    Delete
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+{{end}}
+
+{{define "js"}}
+{{$src := index .StringMap "src"}}
+<script>
+
+function confirmSave() {
+    attention.custom({
+        icon: 'question',
+        title: 'Confirm Save',
+        msg: 'Are you sure you want to save this reservation?',
+        showConfirmButton: true,
+
+        didOpen: function() {
+            notie.alert({ type: 2, text: 'Please confirm within 5 seconds', time: 5 });
+        },
+
+        callback: function(result) {
+            if (result !== false) {
+
+                const btn = document.getElementById('saveBtn');
+                btn.disabled = true;
+                btn.innerHTML = 'Saving...';
+
+                notie.alert({ type: 1, text: 'Saving reservation...', time: 5 });
+
+                document.getElementById('reservationForm').submit();
+            } else {
+                notie.alert({ type: 3, text: 'Save cancelled', time: 5 });
+            }
+        }
+    });
+}
+
+function confirmDelete(id) {
+    attention.custom({
+        icon: 'warning',
+        title: 'Delete Reservation',
+        msg: 'This action cannot be undone. Do you want to delete this reservation?',
+        showConfirmButton: true,
+
+        didOpen: function() {
+            notie.alert({ type: 3, text: 'You are about to delete a reservation', time: 5 });
+        },
+
+        callback: function(result) {
+            if (result !== false) {
+
+                const btn = document.getElementById('deleteBtn');
+                btn.disabled = true;
+                btn.innerHTML = 'Deleting...';
+
+                notie.alert({ type: 1, text: 'Deleting reservation...', time: 5 });
+
+                window.location.href = '/admin/reservations-delete/' + id;
+            }
+        }
+    });
+}
+
+function processRes(id) {
+    attention.custom({
+        icon: 'warning',
+        msg: 'Are you sure you want to mark this reservation as processed?',
+        callback: function (result) {
+            if (result !== false) {
+                window.location.href = '/admin/process-reservations/{{$src}}/' + id;
+            }
+        }
+    });
+}
+
+</script>
+{{end}}
+
+{{template "admin.layout" .}}

@@ -1,20 +1,150 @@
-.my-footer {
-    height: 5em;
-    background-color: #163b65;
-    margin-top: 1.5em;
-    padding: 1em;
+/* ===== Sidebar Calendar & Booking Panel ===== */
+
+.sidebar-calendar {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #0d6efd;
+    padding: 14px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-width: 260px;
+}
+
+.mini-calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.mini-calendar th {
+    color: #6c757d;
+    font-weight: 600;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.mini-calendar td {
+    background: #f8f9fa;
+    padding: 6px;
+    border-radius: 6px;
+    min-width: 28px;
+    border: 1px solid #dee2e6;
+}
+
+.mini-day.has-reservation {
+    background: #d0ebff;
+    font-weight: 600;
+}
+
+.booking-group {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    max-width: 520px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.booking-group strong {
+    display: block;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 6px;
+    color: #0d6efd;
+}
+
+.reservation-badge {
+    background: #eef3f7;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin: 6px 0;
+    font-size: 0.85rem;
+    border-left: 4px solid #0d6efd;
+    transition: background 0.2s ease;
+}
+
+.reservation-badge:hover {
+    background: #e9f2ff;
+}
+
+
+/* ===== Final Visual Enhancements ===== */
+
+body {
+    background-color: #f5f7fa;
+}
+
+.sidebar-calendar {
+    background: #ffffff;
+}
+
+.booking-group {
+    background: #ffffff;
+}
+
+.booking-group:hover {
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+.booking-group strong {
+    font-size: 0.9rem;
+}
+
+.mini-calendar td {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mini-calendar td:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.mini-day.has-reservation {
+    background: linear-gradient(135deg, #d0ebff, #b6dcff);
+}
+
+.reservation-badge {
+    background: linear-gradient(135deg, #eef3f7, #e3ecf3);
+}
+
+.mini-day.today {
+    border: 2px solid #0d6efd;
+    background: #e7f1ff;
+    font-weight: 700;
+}
+.room-1 { border-left-color: #0d6efd; }
+.room-2 { border-left-color: #198754; }
+.room-3 { border-left-color: #fd7e14; }
+.room-4 { border-left-color: #6f42c1; }
+
+.mini-day.active {
+    background: #0d6efd;
+    color: #fff;
+}
+
+.mini-day.active a {
+    color: #fff;
+}
+
+.attention-banner {
+    background: linear-gradient(90deg, #0d6efd, #198754);
     color: white;
-    font-size: 80%;
+    padding: 14px 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,.2);
+    animation: slideDown .35s ease-out;
+    position: relative;
+    z-index: 1050;
 }
 
-.room-image {
-    max-width: 50%;
-}
-
-.notie-container {
-    box-shadow: none;
-}
-
-.datepicker {
-    z-index: 10000;
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
 }

@@ -17,6 +17,7 @@ func _(next http.Handler) http.Handler {
 // NoSurf	adds CSRF protection to all POST requests
 func NoSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
+	csrfHandler.ExemptPath("/admin/calendar/save")
 
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,

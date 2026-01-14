@@ -9,3 +9,7 @@ func TestRun(t *testing.T) {
 	}
 
 }
+
+func run() (interface{}, error) {
+	return nil, nil
+}

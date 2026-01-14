@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"log"
 
-	"bookings/cmd/web/internal/models"
+	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 
 	"github.com/alexedwards/scs/v2"
 )
@@ -18,4 +18,5 @@ type AppConfig struct {
 	InProduction  bool
 	Session       *scs.SessionManager
 	MailChan      chan models.MailData
+	UseTestDB     bool
 }

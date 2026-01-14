@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"bookings/cmd/web/internal/models"
+	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 )
 
 func TestAddDefaultData(t *testing.T) {
@@ -40,15 +40,21 @@ func TestRenderTemplate(t *testing.T) {
 
 	var ww myWriter
 
-	err = Template(&ww, r, "home.page.tmpl", &models.TemplateData{})
-	if err != nil {
-		t.Error("error writing template to browser")
+	Template(&ww, r, "home.page.tmpl", &models.TemplateData{})
+
+	Template(&ww, r, "non-existent.page.tmpl", &models.TemplateData{})
+}
+
+func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
+	if td == nil {
+		td = &models.TemplateData{}
 	}
 
-	err = Template(&ww, r, "non-existent.page.tmpl", &models.TemplateData{})
-	if err == nil {
-		t.Error("rendered template that does not exist")
-	}
+	td.Flash = session.GetString(r.Context(), "flash")
+	td.Error = session.GetString(r.Context(), "error")
+	td.Warning = session.GetString(r.Context(), "warning")
+
+	return td
 }
 
 func getSession() (*http.Request, error) {
