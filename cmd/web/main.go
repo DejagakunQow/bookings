@@ -58,16 +58,18 @@ func main() {
 		port = "8080"
 	}
 
-	srv := &http.Server{
-		Addr:    ":" + port,
-		Handler: routes(&app),
-	}
-
 	log.Println("Starting server on port", port)
-	err = srv.ListenAndServe()
+	log.Println("Initializing routes")
+
+	handler := routes(&app)
+
+	log.Println("Routes initialized, starting HTTP server")
+
+	err = http.ListenAndServe(":"+port, handler)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 // ------------------------------------------------
