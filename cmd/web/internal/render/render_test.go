@@ -1,11 +1,15 @@
 package render
 
 import (
+	"html/template"
 	"net/http"
+	"path/filepath"
 	"testing"
 
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 )
+
+var pathToTemplates string
 
 func TestAddDefaultData(t *testing.T) {
 	var td models.TemplateData
@@ -74,10 +78,49 @@ func TestNewTemplates(t *testing.T) {
 	NewRenderer(app)
 }
 
-func TestCreateTemplateCache(t *testing.T) {
-	pathToTemplates = "./../../templates"
-	_, err := CreateTemplateCache()
+func CreateTemplateCache() (map[string]*template.Template, error) {
+	cache := map[string]*template.Template{}
+
+	// All page templates
+	pages, err := filepath.Glob("./templates/*.page.tmpl")
 	if err != nil {
-		t.Error(err)
+		return cache, err
 	}
+
+	// Public layouts (base)
+	layouts, err := filepath.Glob("./templates/*.layout.tmpl")
+	if err != nil {
+		return cache, err
+	}
+
+	// Admin layouts
+	adminLayouts, err := filepath.Glob("./templates/admin/*.layout.tmpl")
+	if err != nil {
+		return cache, err
+	}
+
+	for _, page := range pages {
+		name := filepath.Base(page)
+
+		ts, err := template.New(name).ParseFiles(page)
+		if err != nil {
+			return cache, err
+		}
+
+		// Parse public layout
+		ts, err = ts.ParseFiles(layouts...)
+		if err != nil {
+			return cache, err
+		}
+
+		// Parse admin layout
+		ts, err = ts.ParseFiles(adminLayouts...)
+		if err != nil {
+			return cache, err
+		}
+
+		cache[name] = ts
+	}
+
+	return cache, nil
 }
