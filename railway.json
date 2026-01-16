@@ -1,0 +1,10 @@
+{
+  "services": [
+    {
+      "name": "bookings",
+      "tcpProxy": {
+        "applicationPort": "$PORT"
+      }
+    }
+  ]
+}
