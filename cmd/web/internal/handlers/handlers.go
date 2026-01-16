@@ -15,6 +15,7 @@ import (
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/render"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/repository"
+
 	"github.com/go-chi/chi"
 )
 
@@ -57,11 +58,8 @@ func NewTestRepo(a *config.AppConfig) *Repository {
 }
 
 // NewHandlers sets the repository for the handlers
-func NewHandlers(r *Repository) {
-	if Repo != nil {
-		return
-	}
-	Repo = r
+func NewHandlers(app *config.AppConfig) {
+	Repo = NewRepo(app, app.DB)
 }
 
 // Home is the home page handler
@@ -100,7 +98,7 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 
 	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
 		Data: data,
-		Form: forms.New(nil),   // 👈 THIS is the missing line
+		Form: forms.New(nil), // 👈 THIS is the missing line
 	})
 }
 
