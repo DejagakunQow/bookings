@@ -53,7 +53,7 @@ func main() {
 	app.DB = db
 
 	// ------------------------------------------------
-	// Session manager (CRITICAL SECTION)
+	// SESSION MANAGER (ALL REQUIRED STEPS)
 	// ------------------------------------------------
 	session := scs.New()
 	session.Lifetime = 24 * time.Hour
@@ -61,7 +61,7 @@ func main() {
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = app.InProduction
 
-	// 🔴 REQUIRED: attach a store, otherwise app WILL panic
+	// 🔴 REQUIRED: Postgres-backed session store
 	session.Store = postgresstore.New(db.SQL)
 
 	app.Session = session
@@ -84,7 +84,8 @@ func main() {
 	log.Println("Starting server on port", port)
 	log.Println("Initializing routes")
 
-	handler := routes(&app)
+	// 🔴 REQUIRED: attach LoadAndSave middleware
+	handler := app.Session.LoadAndSave(routes(&app))
 
 	log.Println("Routes initialized, starting HTTP server")
 
