@@ -6,11 +6,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/driver"
+	"github.com/DejagakunQow/bookings/cmd/web/internal/handlers"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/helpers"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/render"
@@ -19,8 +23,9 @@ import (
 var app config.AppConfig
 
 func main() {
+
 	// ------------------------------------------------
-	// Register types for sessions
+	// Register types for session serialization
 	// ------------------------------------------------
 	registerGOB()
 
@@ -47,8 +52,26 @@ func main() {
 	app.InProduction = os.Getenv("GO_ENV") == "production"
 	app.DB = db
 
+	// ------------------------------------------------
+	// Session manager (CRITICAL SECTION)
+	// ------------------------------------------------
+	session := scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = app.InProduction
+
+	// 🔴 REQUIRED: attach a store, otherwise app WILL panic
+	session.Store = postgresstore.New(db.SQL)
+
+	app.Session = session
+
+	// ------------------------------------------------
+	// Initialize helpers, renderers, handlers
+	// ------------------------------------------------
 	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
+	handlers.NewHandlers(&app)
 
 	// ------------------------------------------------
 	// HTTP server
@@ -69,11 +92,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 // ------------------------------------------------
-// Helper functions (package-level ONLY)
+// Helper functions
 // ------------------------------------------------
 
 func registerGOB() {
