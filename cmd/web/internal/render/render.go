@@ -9,47 +9,25 @@ import (
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 )
 
-var app *config.AppConfig
+var App *config.AppConfig
 
-// NewRenderer sets the application config for the render package
 func NewRenderer(a *config.AppConfig) {
-	app = a
+	App = a
 }
 
-// AddDefaultData adds common data to all templates
+// AddDefaultData adds default data to template data
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
-	if td == nil {
-		td = &models.TemplateData{}
-	}
-
-	// SAFETY: if session is not initialized, do NOT panic
-	if app == nil || app.Session == nil {
-		return td
-	}
-
-	// Flash messages
-	td.Flash = app.Session.PopString(r.Context(), "flash")
-	td.Error = app.Session.PopString(r.Context(), "error")
-	td.Warning = app.Session.PopString(r.Context(), "warning")
-
-	// Authentication flag
-	if app.Session.Exists(r.Context(), "user_id") {
-		td.IsAuthenticated = true
-	}
-
+	td.Flash = App.Session.PopString(r.Context(), "flash")
+	td.Error = App.Session.PopString(r.Context(), "error")
+	td.Warning = App.Session.PopString(r.Context(), "warning")
 	return td
 }
 
 // ---------- PUBLIC PAGES ----------
 func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
-	if app == nil {
-		http.Error(w, "Application not initialized", http.StatusInternalServerError)
-		return
-	}
-
-	ts, ok := app.TemplateCache[tmpl]
+	ts, ok := App.TemplateCache[tmpl]
 	if !ok {
-		http.Error(w, "Template not found", http.StatusInternalServerError)
+		http.Error(w, "template not found", http.StatusInternalServerError)
 		return
 	}
 
@@ -58,8 +36,6 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 	err := ts.ExecuteTemplate(buf, "base", AddDefaultData(td, r))
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Template execution error", http.StatusInternalServerError)
-		return
 	}
 
 	_, _ = buf.WriteTo(w)
@@ -67,14 +43,9 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 
 // ---------- ADMIN PAGES ----------
 func AdminTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
-	if app == nil {
-		http.Error(w, "Application not initialized", http.StatusInternalServerError)
-		return
-	}
-
-	ts, ok := app.TemplateCache[tmpl]
+	ts, ok := App.TemplateCache[tmpl]
 	if !ok {
-		http.Error(w, "Admin template not found", http.StatusInternalServerError)
+		http.Error(w, "admin template not found", http.StatusInternalServerError)
 		return
 	}
 
@@ -83,8 +54,6 @@ func AdminTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mode
 	err := ts.ExecuteTemplate(buf, "admin.layout", AddDefaultData(td, r))
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Admin template execution error", http.StatusInternalServerError)
-		return
 	}
 
 	_, _ = buf.WriteTo(w)
