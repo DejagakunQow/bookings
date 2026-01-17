@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
@@ -52,23 +51,20 @@ func main() {
 	app.InProduction = os.Getenv("GO_ENV") == "production"
 	app.DB = db
 
-	// ------------------------------------------------
-	// Session manager (FULLY CORRECT)
-	// ------------------------------------------------
 	session := scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = app.InProduction
 
-	// REQUIRED: Postgres-backed session store
-	session.Store = postgresstore.New(db.SQL)
-
 	app.Session = session
 
-	// ------------------------------------------------
-	// Initialize helpers, renderers, handlers
-	// ------------------------------------------------
+	tc, err := render.CreateTemplateCache()
+	if err != nil {
+		log.Fatal(err)
+	}
+	app.TemplateCache = tc
+
 	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
 	handlers.NewHandlers(&app)
