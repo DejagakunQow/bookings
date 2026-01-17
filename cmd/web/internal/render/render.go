@@ -4,10 +4,15 @@ import (
 	"bytes"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 )
+
+func humanDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
 
 var App *config.AppConfig
 
