@@ -1,0 +1,57 @@
+package render
+
+import (
+	"html/template"
+	"path/filepath"
+)
+
+var pathToTemplates = "./templates"
+
+func CreateTemplateCache() (map[string]*template.Template, error) {
+	cache := map[string]*template.Template{}
+
+	// Find all page templates
+	pages, err := filepath.Glob(pathToTemplates + "/*.page.tmpl")
+	if err != nil {
+		return cache, err
+	}
+
+	// Public layouts
+	layouts, err := filepath.Glob(pathToTemplates + "/*.layout.tmpl")
+	if err != nil {
+		return cache, err
+	}
+
+	// Admin layouts
+	adminLayouts, err := filepath.Glob(pathToTemplates + "/admin/*.layout.tmpl")
+	if err != nil {
+		return cache, err
+	}
+
+	for _, page := range pages {
+		name := filepath.Base(page)
+
+		ts, err := template.New(name).ParseFiles(page)
+		if err != nil {
+			return cache, err
+		}
+
+		if len(layouts) > 0 {
+			ts, err = ts.ParseFiles(layouts...)
+			if err != nil {
+				return cache, err
+			}
+		}
+
+		if len(adminLayouts) > 0 {
+			ts, err = ts.ParseFiles(adminLayouts...)
+			if err != nil {
+				return cache, err
+			}
+		}
+
+		cache[name] = ts
+	}
+
+	return cache, nil
+}
