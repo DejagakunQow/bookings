@@ -8,8 +8,10 @@ import (
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
+	isoDate := 0
 	funcMap := template.FuncMap{
 		"humanDate": humanDate,
+		"isoDate":   isoDate,
 	}
 
 	// Page templates
