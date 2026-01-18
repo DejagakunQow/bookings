@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -441,14 +442,22 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	total, _ := m.DB.CountReservations()
-	newRes, _ := m.DB.CountNewReservations()
+
+	totalReservations, err := m.DB.CountReservations()
+	if err != nil {
+		log.Println(err)
+	}
+
+	newReservations, err := m.DB.CountNewReservations()
+	if err != nil {
+		log.Println(err)
+	}
 
 	data := make(map[string]interface{})
-	data["total_reservations"] = total
-	data["new_reservations"] = newRes
+	data["total_reservations"] = totalReservations
+	data["new_reservations"] = newReservations
 
-	render.AdminTemplate(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{
+	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
 }
