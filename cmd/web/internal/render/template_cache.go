@@ -3,12 +3,16 @@ package render
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 )
+
+func isoDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	isoDate := 0
 	funcMap := template.FuncMap{
 		"humanDate": humanDate,
 		"isoDate":   isoDate,
