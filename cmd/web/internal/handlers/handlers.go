@@ -441,7 +441,7 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
+	render.AdminTemplate(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
 }
 
 func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
