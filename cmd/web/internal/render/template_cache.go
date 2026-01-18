@@ -5,25 +5,27 @@ import (
 	"path/filepath"
 )
 
-var pathToTemplates = "./templates"
-
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	// Find all page templates
-	pages, err := filepath.Glob(pathToTemplates + "/*.page.tmpl")
+	funcMap := template.FuncMap{
+		"humanDate": humanDate,
+	}
+
+	// Page templates
+	pages, err := filepath.Glob("./templates/*.page.tmpl")
 	if err != nil {
 		return cache, err
 	}
 
 	// Public layouts
-	layouts, err := filepath.Glob(pathToTemplates + "/*.layout.tmpl")
+	layouts, err := filepath.Glob("./templates/*.layout.tmpl")
 	if err != nil {
 		return cache, err
 	}
 
 	// Admin layouts
-	adminLayouts, err := filepath.Glob(pathToTemplates + "/admin/*.layout.tmpl")
+	adminLayouts, err := filepath.Glob("./templates/admin/*.layout.tmpl")
 	if err != nil {
 		return cache, err
 	}
@@ -31,7 +33,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		ts, err := template.New(name).ParseFiles(page)
+		ts, err := template.New(name).Funcs(funcMap).ParseFiles(page)
 		if err != nil {
 			return cache, err
 		}
