@@ -457,7 +457,7 @@ func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 	data["total_reservations"] = totalReservations
 	data["new_reservations"] = newReservations
 
-	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{
+	render.AdminTemplate(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
 }
