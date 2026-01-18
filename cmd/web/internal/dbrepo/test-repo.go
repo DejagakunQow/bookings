@@ -169,3 +169,11 @@ func (m *testDBRepo) AllRooms() ([]models.Room, error) {
 	var rooms []models.Room
 	return rooms, nil
 }
+
+func (m *testDBRepo) CountReservations() (int, error) {
+	return 5, nil
+}
+
+func (m *testDBRepo) CountNewReservations() (int, error) {
+	return 2, nil
+}
