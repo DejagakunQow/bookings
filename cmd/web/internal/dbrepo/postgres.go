@@ -498,3 +498,17 @@ func (m *postgresDBRepo) AllRooms() ([]models.Room, error) {
 	}
 	return rooms, nil
 }
+
+func (m *postgresDBRepo) CountReservations() (int, error) {
+	var count int
+	query := `select count(id) from reservations`
+	err := m.DB.QueryRow(query).Scan(&count)
+	return count, err
+}
+
+func (m *postgresDBRepo) CountNewReservations() (int, error) {
+	var count int
+	query := `select count(id) from reservations where processed = 0`
+	err := m.DB.QueryRow(query).Scan(&count)
+	return count, err
+}

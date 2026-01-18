@@ -1,11 +1,37 @@
-{{define "page-title"}}
-Dashboard
-{{end}}
-
 {{define "content"}}
-<div class="col-md-12">
-    Dashboard content
-</div>
-{{end}}
 
-{{template "admin" .}}
+<div class="col-md-12">
+    <div class="row">
+
+        <!-- TOTAL RESERVATIONS -->
+        <div class="col-md-6 grid-margin">
+            <div class="card border-left-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-muted text-uppercase mb-2">
+                        Total Reservations
+                    </h5>
+                    <h2 class="font-weight-bold">
+                        {{index .Data "total_reservations"}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW RESERVATIONS -->
+        <div class="col-md-6 grid-margin">
+            <div class="card border-left-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-muted text-uppercase mb-2">
+                        New Reservations
+                    </h5>
+                    <h2 class="font-weight-bold">
+                        {{index .Data "new_reservations"}}
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{{end}}
