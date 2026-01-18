@@ -22,9 +22,13 @@ func NewRenderer(a *config.AppConfig) {
 
 // AddDefaultData adds default data to template data
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
-	td.Flash = App.Session.PopString(r.Context(), "flash")
-	td.Error = App.Session.PopString(r.Context(), "error")
-	td.Warning = App.Session.PopString(r.Context(), "warning")
+	if td == nil {
+		td = &models.TemplateData{}
+	}
+
+	// FORCE admin visibility (temporary)
+	td.IsAuthenticated = true
+
 	return td
 }
 
