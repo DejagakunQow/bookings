@@ -245,9 +245,9 @@ func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(rooms) == 0 {
+		m.App.Session.Remove(r.Context(), "reservation")
 		m.App.Session.Put(r.Context(), "error", "No availability")
 		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
-
 		return
 	}
 
