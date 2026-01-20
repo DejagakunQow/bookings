@@ -68,6 +68,8 @@ func routes(app *config.AppConfig) http.Handler {
 
 		mux.Post("/calendar/{id}", handlers.Repo.UpdateCalendarReservation)
 		mux.Delete("/calendar/{id}", handlers.Repo.DeleteCalendarReservation)
+
+		mux.Use(Recoverer)
 	})
 
 	return mux
