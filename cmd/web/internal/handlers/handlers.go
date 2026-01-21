@@ -83,6 +83,14 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ✅ READ room_id from query string
+	roomID, err := strconv.Atoi(r.URL.Query().Get("room_id"))
+	if err != nil || roomID == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	res.RoomID = roomID
+
 	// 🔴 TEST CONDITION: room does not exist
 	if res.RoomID == 100 {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -99,7 +107,7 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 
 	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
 		Data: data,
-		Form: forms.New(nil), // 👈 THIS is the missing line
+		Form: forms.New(nil),
 	})
 }
 
