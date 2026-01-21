@@ -77,38 +77,19 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 // Reservation renders the make a reservation page and displays form
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 
+	log.Println(">>> HIT Reservation handler")
+
 	res, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 	if !ok {
+		log.Println(">>> NO reservation in session")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
-	// ✅ READ room_id from query string
-	roomID, err := strconv.Atoi(r.URL.Query().Get("room_id"))
-	if err != nil || roomID == 0 {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	res.RoomID = roomID
+	log.Println(">>> Reservation from session:", res)
 
-	// 🔴 TEST CONDITION: room does not exist
-	if res.RoomID == 100 {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
+	// rest of your code
 
-	// normal case
-	room, _ := m.DB.GetRoomByID(res.RoomID)
-	res.Room.RoomName = room.RoomName
-	m.App.Session.Put(r.Context(), "reservation", res)
-
-	data := make(map[string]interface{})
-	data["reservation"] = res
-
-	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
-		Data: data,
-		Form: forms.New(nil),
-	})
 }
 
 // PostReservation handles the posting of a reservation form
