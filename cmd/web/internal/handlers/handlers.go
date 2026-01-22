@@ -306,6 +306,16 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	res.Email = r.Form.Get("email")
 	res.Phone = r.Form.Get("phone")
 
+	// 🔹 INSERT reservation into DB
+	newID, err := m.DB.InsertReservation(res)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Cannot save reservation")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// store reservation ID
+	res.ID = newID
 	m.App.Session.Put(r.Context(), "reservation", res)
 
 	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
