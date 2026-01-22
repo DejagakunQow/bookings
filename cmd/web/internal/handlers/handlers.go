@@ -306,7 +306,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	res.Email = r.Form.Get("email")
 	res.Phone = r.Form.Get("phone")
 
-	// 🔹 INSERT reservation into DB
+	// 1️⃣ Insert reservation
 	newID, err := m.DB.InsertReservation(res)
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "Cannot save reservation")
@@ -314,10 +314,26 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// store reservation ID
 	res.ID = newID
-	m.App.Session.Put(r.Context(), "reservation", res)
 
+	// 2️⃣ Insert room restriction
+	restriction := models.RoomRestriction{
+		StartDate:     res.StartDate,
+		EndDate:       res.EndDate,
+		RoomID:        res.RoomID,
+		ReservationID: newID,
+		RestrictionID: 1, // 1 = Reservation
+	}
+
+	err = m.DB.InsertRoomRestriction(restriction)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Cannot save room restriction")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// 3️⃣ Update session & redirect
+	m.App.Session.Put(r.Context(), "reservation", res)
 	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
 }
 
