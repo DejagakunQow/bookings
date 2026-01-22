@@ -31,4 +31,5 @@ type DatabaseRepo interface {
 	AllReservationsForDate(date time.Time) ([]models.Reservation, error)
 	UpdateProcessedForReservation(id, processed int) error
 	IsRoomAvailable(roomID int, start, end time.Time) (bool, error)
+	AllRooms() ([]models.Room, error)
 }
