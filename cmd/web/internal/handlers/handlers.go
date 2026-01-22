@@ -16,6 +16,7 @@ import (
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/render"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/repository"
+	"github.com/justinas/nosurf"
 
 	"github.com/go-chi/chi"
 )
@@ -547,13 +548,42 @@ func (m *Repository) UpdateCalendarReservation(w http.ResponseWriter, r *http.Re
 }
 
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+
 	now := time.Now()
 
+	if r.URL.Query().Get("month") != "" {
+		year, _ := strconv.Atoi(r.URL.Query().Get("year"))
+		month, _ := strconv.Atoi(r.URL.Query().Get("month"))
+		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	}
+
+	// ✅ LOAD ROOMS (FIXES EMPTY SELECT)
+	rooms, err := m.DB.AllRooms()
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Cannot load rooms")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
+		return
+	}
+
+	// -----------------------------------
+	// DATA MAP (EXTEND, DO NOT REPLACE)
+	// -----------------------------------
 	data := make(map[string]interface{})
-	data["now"] = now
+	data["rooms"] = rooms
+
+	// -----------------------------------
+	// STRING MAP (DECLARE LOCALLY)
+	// -----------------------------------
+	stringMap := make(map[string]string)
+	stringMap["next_month"] = strconv.Itoa(int(now.AddDate(0, 1, 0).Month()))
+	stringMap["next_month_year"] = strconv.Itoa(now.AddDate(0, 1, 0).Year())
+	stringMap["last_month"] = strconv.Itoa(int(now.AddDate(0, -1, 0).Month()))
+	stringMap["last_month_year"] = strconv.Itoa(now.AddDate(0, -1, 0).Year())
 
 	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{
-		Data: data,
+		Data:      data,
+		StringMap: stringMap,
+		CSRFToken: nosurf.Token(r),
 	})
 }
 
