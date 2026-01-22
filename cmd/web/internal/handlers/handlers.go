@@ -287,6 +287,29 @@ func (m *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
 		Form: forms.New(nil),
 	})
 }
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	res, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	res.FirstName = r.Form.Get("first_name")
+	res.LastName = r.Form.Get("last_name")
+	res.Email = r.Form.Get("email")
+	res.Phone = r.Form.Get("phone")
+
+	m.App.Session.Put(r.Context(), "reservation", res)
+
+	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
+}
 
 // PostLogin processes login
 func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
