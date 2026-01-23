@@ -1,56 +1,57 @@
- <!doctype html>
-    <html lang="en">
+{{template "base" .}}
 
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{{define "content"}}
+<div class="container">
 
-        <title>My Nice Page</title>
+    <h1 class="mt-4 mb-4 text-center">About Our Hotel</h1>
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-              integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-        <link rel="stylesheet"
-              href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.2/dist/css/datepicker-bs4.min.css">
-        <link rel="stylesheet" type="text/css" href="https://unpkg.com/notie/dist/notie.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.min.css">
-        <link rel="stylesheet" type="text/css" href="static/css/styles.css">
-    </head>
+    <!-- HERO IMAGE -->
+    <img src="/static/img/about-hero.jpg"
+         class="img-fluid rounded shadow mb-5"
+         alt="Premium hospitality experience">
 
-    <body>
+    <p class="lead text-center mb-5">
+        We are building more than a hotel — we are creating a modern,
+        technology-driven hospitality experience designed for comfort,
+        transparency, and long-term value.
+    </p>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand" href="#">Navbar</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="about.html">About</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Rooms
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="generals.html">General's Quarters</a>
-          <a class="dropdown-item" href="majors.html">Major's Suite</a>
+    <!-- SECTION 1 -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <img src="/static/img/about-rooms.jpg"
+                 class="img-fluid rounded shadow"
+                 alt="Modern hotel rooms">
         </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="reservation.html">Book Now</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="contact.html">Contact</a>
-      </li>
-      
-    </ul>
-  </div>
-</nav>
+        <div class="col-md-6">
+            <h3>Designed for Comfort</h3>
+            <p>
+                Our rooms combine elegant design with practical comfort,
+                offering guests a calm, secure, and memorable stay.
+            </p>
+        </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6 order-md-2">
+            <img src="/static/img/about-experience.jpg"
+                 class="img-fluid rounded shadow"
+                 alt="Guest-focused experience">
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h3>What Other Hotels Wish They Had</h3>
+            <p>
+                A fully integrated, real-time reservation system that
+                eliminates double bookings, improves efficiency, and
+                delivers a seamless experience for both guests and operators.
+            </p>
+        </div>
+    </div>
+
+</div>
+{{end}}
+
 
 
     
