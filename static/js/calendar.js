@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("guest-name").value = target.dataset.guest;
         document.getElementById("start-date").value = target.dataset.start;
         document.getElementById("end-date").value = target.dataset.end;
+
+        pendingBookings = []; // clear pending when editing
+        renderPreview();
     });
 
     // ===============================
@@ -39,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ===============================
-    // ADD BOOKING
+    // ADD BOOKING (NEW)
     // ===============================
     const addBtn = document.getElementById("add-booking");
     if (addBtn) {
@@ -55,12 +58,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            editingReservationID = null; // switching to add mode
+
             pendingBookings.push({
-                roomID: parseInt(roomSelect.value),
-                roomName: roomSelect.options[roomSelect.selectedIndex].text,
-                guest,
-                start,
-                end
+                room_id: parseInt(roomSelect.value),
+                guest: guest,
+                start_date: start,
+                end_date: end,
+                roomName: roomSelect.options[roomSelect.selectedIndex].text
             });
 
             renderPreview();
@@ -68,24 +73,50 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ===============================
-    // SAVE CALENDAR
+    // SAVE CALENDAR (ADD OR UPDATE)
     // ===============================
     const saveBtn = document.getElementById("save-calendar");
     if (saveBtn) {
         saveBtn.addEventListener("click", async function () {
 
-            if (pendingBookings.length === 0 && !editingReservationID) {
-                alert("No changes to save");
+            const token = document.getElementById("csrf-token").value;
+
+            // UPDATE EXISTING
+            if (editingReservationID) {
+
+                const payload = {
+                    room_id: document.getElementById("room-select").value,
+                    guest: document.getElementById("guest-name").value,
+                    start_date: document.getElementById("start-date").value,
+                    end_date: document.getElementById("end-date").value
+                };
+
+                const response = await fetch(`/admin/calendar/${editingReservationID}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert("Reservation updated");
+                    location.reload();
+                } else {
+                    alert("Failed to update reservation");
+                }
+
                 return;
             }
 
-            const token = document.getElementById("csrf-token").value;
+            // ADD NEW BOOKINGS
+            if (pendingBookings.length === 0) {
+                alert("No bookings to save");
+                return;
+            }
 
-            const url = editingReservationID
-                ? `/admin/calendar/${editingReservationID}`
-                : `/admin/calendar/0`;
-
-            const response = await fetch(url, {
+            const response = await fetch(`/admin/calendar/0`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -95,10 +126,10 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (response.ok) {
-                alert("Changes saved");
+                alert("Bookings saved");
                 location.reload();
             } else {
-                alert("Failed to save calendar");
+                alert("Failed to save bookings");
             }
         });
     }
