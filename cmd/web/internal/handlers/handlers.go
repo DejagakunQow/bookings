@@ -549,6 +549,10 @@ func (m *Repository) UpdateCalendarReservation(w http.ResponseWriter, r *http.Re
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
+	selectedDay := 0
+	if r.URL.Query().Get("day") != "" {
+		selectedDay, _ = strconv.Atoi(r.URL.Query().Get("day"))
+	}
 
 	// 🔹 Read month navigation params (matches your tests)
 	if r.URL.Query().Get("y") != "" && r.URL.Query().Get("m") != "" {
@@ -580,6 +584,7 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 	data["month"] = int(now.Month())
 	data["year"] = now.Year()
 	data["rooms"] = rooms
+	data["selectedDay"] = selectedDay
 
 	// 🔹 StringMap for navigation links
 	stringMap := make(map[string]string)
