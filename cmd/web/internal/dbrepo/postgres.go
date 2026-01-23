@@ -518,3 +518,60 @@ func (m *postgresDBRepo) CountNewReservations() (int, error) {
 	err := m.DB.QueryRow(query).Scan(&count)
 	return count, err
 }
+
+func (m *postgresDBRepo) GetReservationsForMonth(start, end time.Time) ([]models.Reservation, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var reservations []models.Reservation
+
+	query := `
+		SELECT
+			r.id,
+			r.first_name,
+			r.last_name,
+			r.email,
+			r.phone,
+			r.start_date,
+			r.end_date,
+			r.room_id,
+			rm.room_name
+		FROM reservations r
+		JOIN rooms rm ON rm.id = r.room_id
+		WHERE
+			(r.start_date <= $2 AND r.end_date >= $1)
+		ORDER BY r.start_date
+	`
+
+	rows, err := m.DB.QueryContext(ctx, query, start, end)
+	if err != nil {
+		return reservations, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var res models.Reservation
+		var room models.Room
+
+		err := rows.Scan(
+			&res.ID,
+			&res.FirstName,
+			&res.LastName,
+			&res.Email,
+			&res.Phone,
+			&res.StartDate,
+			&res.EndDate,
+			&res.RoomID,
+			&room.RoomName,
+		)
+		if err != nil {
+			return reservations, err
+		}
+
+		res.Room = room
+		reservations = append(reservations, res)
+	}
+
+	return reservations, nil
+}

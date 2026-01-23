@@ -177,3 +177,7 @@ func (m *testDBRepo) CountReservations() (int, error) {
 func (m *testDBRepo) CountNewReservations() (int, error) {
 	return 2, nil
 }
+
+func (m *testDBRepo) GetReservationsForMonth(start, end time.Time) ([]models.Reservation, error) {
+	return []models.Reservation{}, nil
+}
