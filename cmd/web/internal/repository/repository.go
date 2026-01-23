@@ -26,6 +26,8 @@ type DatabaseRepo interface {
 	CountNewReservations() (int, error)
 
 	GetReservationByID(id int) (models.Reservation, error)
+	GetReservationsForMonth(start, end time.Time) ([]models.Reservation, error)
+
 	UpdateReservation(u models.Reservation) error
 	DeleteReservation(id int) error
 	AllReservationsForDate(date time.Time) ([]models.Reservation, error)

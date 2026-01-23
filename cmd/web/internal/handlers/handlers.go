@@ -546,18 +546,26 @@ func (m *Repository) UpdateCalendarReservation(w http.ResponseWriter, r *http.Re
 
 	w.WriteHeader(http.StatusOK)
 }
-
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
 
-	if r.URL.Query().Get("month") != "" {
-		year, _ := strconv.Atoi(r.URL.Query().Get("year"))
-		month, _ := strconv.Atoi(r.URL.Query().Get("month"))
+	// 🔹 Read month navigation params (matches your tests)
+	if r.URL.Query().Get("y") != "" && r.URL.Query().Get("m") != "" {
+		year, _ := strconv.Atoi(r.URL.Query().Get("y"))
+		month, _ := strconv.Atoi(r.URL.Query().Get("m"))
 		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	}
 
-	// ✅ LOAD ROOMS (FIXES EMPTY SELECT)
+	// 🔹 Build calendar (ENGINE FROM STEP 3)
+	calendar, err := m.buildCalendar(now)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "Cannot build calendar")
+		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
+		return
+	}
+
+	// 🔹 Load rooms (for dropdown + JS)
 	rooms, err := m.DB.AllRooms()
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "Cannot load rooms")
@@ -565,15 +573,15 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// -----------------------------------
-	// DATA MAP (EXTEND, DO NOT REPLACE)
-	// -----------------------------------
+	// 🔹 Data map (MATCHES TEMPLATE)
 	data := make(map[string]interface{})
+	data["calendar"] = calendar
+	data["now"] = now
+	data["month"] = int(now.Month())
+	data["year"] = now.Year()
 	data["rooms"] = rooms
 
-	// -----------------------------------
-	// STRING MAP (DECLARE LOCALLY)
-	// -----------------------------------
+	// 🔹 StringMap for navigation links
 	stringMap := make(map[string]string)
 	stringMap["next_month"] = strconv.Itoa(int(now.AddDate(0, 1, 0).Month()))
 	stringMap["next_month_year"] = strconv.Itoa(now.AddDate(0, 1, 0).Year())
@@ -595,4 +603,67 @@ func (m *Repository) DeleteCalendarReservation(w http.ResponseWriter, r *http.Re
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	_ = m.DB.DeleteReservation(id)
 	w.WriteHeader(http.StatusOK)
+}
+
+// buildCalendar builds a month calendar with reservations mapped to days
+func (m *Repository) buildCalendar(now time.Time) ([][]models.CalendarDay, error) {
+
+	year, month, _ := now.Date()
+	location := now.Location()
+
+	firstOfMonth := time.Date(year, month, 1, 0, 0, 0, 0, location)
+	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
+
+	// Fetch reservations for this month
+	reservations, err := m.DB.GetReservationsForMonth(firstOfMonth, lastOfMonth)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map reservations by date
+	resByDay := make(map[string][]models.Reservation)
+	for _, res := range reservations {
+		for d := res.StartDate; !d.After(res.EndDate); d = d.AddDate(0, 0, 1) {
+			key := d.Format("2006-01-02")
+			resByDay[key] = append(resByDay[key], res)
+		}
+	}
+
+	var calendar [][]models.CalendarDay
+	week := []models.CalendarDay{}
+
+	// Pad start of month
+	startWeekday := int(firstOfMonth.Weekday()) // Sunday = 0
+	for i := 0; i < startWeekday; i++ {
+		week = append(week, models.CalendarDay{})
+	}
+
+	// Build days
+	for day := 1; day <= lastOfMonth.Day(); day++ {
+		date := time.Date(year, month, day, 0, 0, 0, 0, location)
+		key := date.Format("2006-01-02")
+
+		cd := models.CalendarDay{
+			Day:          day,
+			Date:         date,
+			Reservations: resByDay[key],
+		}
+
+		week = append(week, cd)
+
+		if len(week) == 7 {
+			calendar = append(calendar, week)
+			week = []models.CalendarDay{}
+		}
+	}
+
+	// Pad end of month
+	if len(week) > 0 {
+		for len(week) < 7 {
+			week = append(week, models.CalendarDay{})
+		}
+		calendar = append(calendar, week)
+	}
+
+	return calendar, nil
 }
