@@ -1,11 +1,49 @@
-{{define "content"}}
-<div class="container mt-5">
-<h1>Contact Us</h1>
+<div class="container my-5">
 
-<p>Email: info@aliluxury.com</p>
-<p>Phone: +254 745952806</p>
-<p>Location: Nairobi, Kenya</p>
+    <h1 class="mb-4 text-center">Contact Us</h1>
+
+    <div class="row">
+
+        <!-- CONTACT DETAILS -->
+        <div class="col-md-5 mb-4">
+            <div class="p-4 bg-white shadow rounded h-100">
+
+                <h4 class="mb-3">Our Location</h4>
+
+                <p class="mb-2">
+                    <strong>Ali's luxury Hotel</strong><br>
+                    Nairobi, Kenya
+                </p>
+
+                <p class="mb-2">
+                    📞 +254 745 952 806
+                </p>
+
+                <p class="mb-2">
+                    ✉ info@Ali'sluxuryhotel.com
+                </p>
+
+                <p class="mt-4 text-muted">
+                    We are conveniently located and easy to reach.
+                    Feel free to visit us or contact us anytime.
+                </p>
+            </div>
+        </div>
+
+        <!-- GOOGLE MAP -->
+        <div class="col-md-7">
+            <div class="shadow rounded overflow-hidden" style="height: 100%;">
+                <iframe
+                    src="https://www.google.com/maps?q=Nairobi,Kenya&output=embed"
+                    width="100%"
+                    height="350"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+
+    </div>
 </div>
-{{end}}
-
-{{template "base" .}}
