@@ -1,3 +1,7 @@
+{{template "base" .}}
+
+{{define "content"}}
+
 <div class="container my-5">
 
     <h1 class="mb-4 text-center">Contact Us</h1>
@@ -11,7 +15,7 @@
                 <h4 class="mb-3">Our Location</h4>
 
                 <p class="mb-2">
-                    <strong>Ali's luxury Hotel</strong><br>
+                    <strong>Ali's Luxury Hotel</strong><br>
                     Nairobi, Kenya
                 </p>
 
@@ -20,13 +24,14 @@
                 </p>
 
                 <p class="mb-2">
-                    ✉ info@Ali'sluxuryhotel.com
+                    ✉ info@alisluxuryhotel.com
                 </p>
 
                 <p class="mt-4 text-muted">
-                    We are conveniently located and easy to reach.
-                    Feel free to visit us or contact us anytime.
+                    We are conveniently located in the heart of Nairobi,
+                    offering comfort, elegance, and world-class hospitality.
                 </p>
+
             </div>
         </div>
 
@@ -38,12 +43,13 @@
                     width="100%"
                     height="350"
                     style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
+                    allowfullscreen
+                    loading="lazy">
                 </iframe>
             </div>
         </div>
 
     </div>
 </div>
+
+{{end}}
