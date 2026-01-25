@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/handlers"
@@ -22,7 +25,13 @@ func routes(app *config.AppConfig) http.Handler {
 	// ------------------------------------------------
 	// Static files
 	// ------------------------------------------------
-	fileServer := http.FileServer(http.Dir("../static"))
+
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileServer := http.FileServer(http.Dir(filepath.Join(wd, "static")))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	// ------------------------------------------------
