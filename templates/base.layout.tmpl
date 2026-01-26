@@ -3,16 +3,16 @@
 <html lang="en">
 
 <head>
-<meta charset="utf-8">
-<title>Ali's Luxury Getaway</title>
+    <meta charset="utf-8">
+    <title>Ali's Luxury Getaway</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
 
-<!-- FullCalendar -->
-<link href="/static/fullcalendar/main.min.css" rel="stylesheet">
+    <!-- FullCalendar -->
+    <link href="/static/fullcalendar/main.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -24,39 +24,72 @@
 {{end}}
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-<a class="navbar-brand" href="#">Navbar</a>
-<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-<span class="navbar-toggler-icon"></span>
-</button>
 
-<div class="collapse navbar-collapse" id="navbarNav">
-<ul class="navbar-nav">
-<li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-<li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+    <a class="navbar-brand" href="/">Ali's Luxury</a>
 
-<li class="nav-item dropdown">
-<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">Rooms</a>
-<div class="dropdown-menu">
-<a class="dropdown-item" href="/generals-quarters">General's Quarters</a>
-<a class="dropdown-item" href="/majors-suite">Major's Suite</a>
-</div>
-</li>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-<li class="nav-item"><a class="nav-link" href="/search-availability">Book Now</a></li>
-<li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+    <div class="collapse navbar-collapse" id="navbarNav">
 
-{{if .IsAuthenticated}}
-<li class="nav-item">
-<a class="nav-link text-warning font-weight-bold" href="/admin/dashboard">Admin</a>
-</li>
-{{end}}
+        <!-- LEFT SIDE -->
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
 
-</ul>
-</div>
+            <li class="nav-item">
+                <a class="nav-link" href="/about">About</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                    Rooms
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/generals-quarters">General's Quarters</a>
+                    <a class="dropdown-item" href="/majors-suite">Major's Suite</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/search-availability">Book Now</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/contact">Contact</a>
+            </li>
+        </ul>
+
+        <!-- RIGHT SIDE -->
+        <ul class="navbar-nav ml-auto">
+            {{if .IsAuthenticated}}
+                <li class="nav-item">
+                    <a class="nav-link text-warning font-weight-bold" href="/admin/dashboard">
+                        Admin
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout">
+                        Logout
+                    </a>
+                </li>
+            {{else}}
+                <li class="nav-item">
+                    <a class="nav-link text-success font-weight-bold" href="/login">
+                        Login
+                    </a>
+                </li>
+            {{end}}
+        </ul>
+
+    </div>
 </nav>
 
 <div class="container mt-4">
-{{block "content" .}}{{end}}
+    {{block "content" .}}{{end}}
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
