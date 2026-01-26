@@ -61,6 +61,7 @@ func routes(app *config.AppConfig) http.Handler {
 	// Admin routes
 	// ------------------------------------------------
 	mux.Route("/admin", func(mux chi.Router) {
+		mux.Use(RequireAuth)
 
 		mux.Get("/dashboard", handlers.Repo.AdminDashboard)
 		mux.Get("/reservations-new", handlers.Repo.AdminNewReservations)
