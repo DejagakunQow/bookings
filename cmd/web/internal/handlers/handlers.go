@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/dbrepo"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/driver"
@@ -346,35 +344,23 @@ func (m *Repository) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		render.Template(w, r, "login.page.tmpl", &models.TemplateData{
-			Form: forms.New(nil),
-		})
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
-	// ✅ hard-coded admin email (safe for now)
-	if email != "admin@site.com" {
-		m.App.Session.Put(r.Context(), "error", "Invalid login credentials")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	if email == "admin@site.com" && password == "password123" {
+		m.App.Session.Put(r.Context(), "user_id", 1)
+
+		// ✅ FIXED REDIRECT
+		http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
 		return
 	}
 
-	// ✅ bcrypt hashed password (from your generator)
-	hashedPassword := "$2a$10$R701Cv9HkJfEHGjs7p3d5eMYjlAWqeRnn7ZKs18rOLXC4a.FjY8Sq"
-
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err != nil {
-		m.App.Session.Put(r.Context(), "error", "Invalid login credentials")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	// ✅ SUCCESS
-	m.App.Session.Put(r.Context(), "user_id", 1)
-	http.Redirect(w, r, "/admin/dashboard", http.StatusSeeOther)
+	m.App.Session.Put(r.Context(), "error", "Invalid login credentials")
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 // AvailabilityJSON handles request for availability and send JSON response
