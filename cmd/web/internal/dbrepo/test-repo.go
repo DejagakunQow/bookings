@@ -28,6 +28,17 @@ func (m *testDBRepo) InsertRoomRestriction(r models.RoomRestriction) error {
 	return nil
 }
 
+// CreateReservation mocks the atomic reservation + room restriction insert
+func (m *testDBRepo) CreateReservation(res models.Reservation, restrictionID int) (int, error) {
+	if res.RoomID == 2 {
+		return 0, errors.New("some error inserting reservation")
+	}
+	if res.RoomID == 1000 {
+		return 0, errors.New("some error inserting room restriction")
+	}
+	return 1, nil
+}
+
 // SearchAvailabilityByDatesByRoomID returns true if availability exists for roomID, and false if no availability
 func (m *testDBRepo) SearchAvailabilityByDatesByRoomID(start, end time.Time, roomID int) (bool, error) {
 	// set up a test time
@@ -96,6 +107,9 @@ func (m *testDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]mode
 
 // GetRoomByID gets a room by id
 func (m *testDBRepo) GetRoomByID(id int) (models.Room, error) {
+	if id == 100 {
+		return models.Room{}, errors.New("room does not exist")
+	}
 	return models.Room{
 		ID:       id,
 		RoomName: "Test Room",
@@ -113,8 +127,10 @@ func (m *testDBRepo) UpdateUser(u models.User) error {
 }
 
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
-
-	return 1, "", nil
+	if email == "me@here.ca" && testPassword == "password" {
+		return 1, "", nil
+	}
+	return 0, "", errors.New("invalid credentials")
 }
 
 // AllReservations returns a slice of all reservations

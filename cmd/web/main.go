@@ -80,8 +80,8 @@ func main() {
 	log.Println("Starting server on port", port)
 	log.Println("Initializing routes")
 
-	// REQUIRED: wrap router with SCS middleware
-	handler := app.Session.LoadAndSave(routes(&app))
+	// Session middleware is applied inside routes() via SessionLoad
+	handler := routes(&app)
 
 	log.Println("Routes initialized, starting HTTP server")
 

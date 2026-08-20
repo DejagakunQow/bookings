@@ -69,6 +69,7 @@ func TestHandlers(t *testing.T) {
 var reservationTests = []struct {
 	name               string
 	reservation        models.Reservation
+	url                string
 	expectedStatusCode int
 	expectedLocation   string
 	expectedHTML       string
@@ -82,12 +83,14 @@ var reservationTests = []struct {
 				RoomName: "General's Quarters",
 			},
 		},
+		url:                "/make-reservation?room_id=1",
 		expectedStatusCode: http.StatusOK,
-		expectedHTML:       `action="/make-reservation"`,
+		expectedHTML:       "Make Reservation",
 	},
 	{
 		name:               "reservation-not-in-session",
 		reservation:        models.Reservation{},
+		url:                "/make-reservation",
 		expectedStatusCode: http.StatusSeeOther,
 		expectedLocation:   "/",
 		expectedHTML:       "",
@@ -101,6 +104,7 @@ var reservationTests = []struct {
 				RoomName: "General's Quarters",
 			},
 		},
+		url:                "/make-reservation?room_id=100",
 		expectedStatusCode: http.StatusSeeOther,
 		expectedLocation:   "/",
 		expectedHTML:       "",
@@ -110,7 +114,7 @@ var reservationTests = []struct {
 // TestReservation tests the reservation handler
 func TestReservation(t *testing.T) {
 	for _, e := range reservationTests {
-		req, _ := http.NewRequest("GET", "/make-reservation", nil)
+		req, _ := http.NewRequest("GET", e.url, nil)
 		ctx := getCtx(req)
 		req = req.WithContext(ctx)
 
@@ -144,9 +148,14 @@ func TestReservation(t *testing.T) {
 	}
 }
 
-// postReservationTests is the test data for hte PostReservation handler test
+// postReservationTests is the test data for the PostReservation handler test.
+// The real handler pulls RoomID/StartDate/EndDate from the session (set earlier
+// in the search-availability -> choose-room -> make-reservation flow), and only
+// reads first_name/last_name/email/phone from the posted form, so each case
+// seeds the session reservation it needs rather than posting dates/room_id.
 var postReservationTests = []struct {
 	name                 string
+	reservation          models.Reservation
 	postedData           url.Values
 	expectedResponseCode int
 	expectedLocation     string
@@ -154,96 +163,57 @@ var postReservationTests = []struct {
 }{
 	{
 		name: "valid-data",
+		reservation: models.Reservation{
+			RoomID:    1,
+			StartDate: time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2050, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
 		postedData: url.Values{
-			"start_date": {"2050-01-01"},
-			"end_date":   {"2050-01-02"},
 			"first_name": {"John"},
 			"last_name":  {"Smith"},
 			"email":      {"john@smith.com"},
 			"phone":      {"555-555-5555"},
-			"room_id":    {"1"},
 		},
 		expectedResponseCode: http.StatusSeeOther,
 		expectedHTML:         "",
 		expectedLocation:     "/reservation-summary",
 	},
 	{
-		name:                 "missing-post-body",
+		name:                 "missing-reservation-in-session",
 		postedData:           nil,
 		expectedResponseCode: http.StatusSeeOther,
 		expectedHTML:         "",
 		expectedLocation:     "/",
 	},
 	{
-		name: "invalid-start-date",
-		postedData: url.Values{
-			"start_date": {"invalid"},
-			"end_date":   {"2050-01-02"},
-			"first_name": {"John"},
-			"last_name":  {"Smith"},
-			"email":      {"john@smith.com"},
-			"phone":      {"555-555-5555"},
-			"room_id":    {"1"},
-		},
-		expectedResponseCode: http.StatusSeeOther,
-		expectedHTML:         "",
-		expectedLocation:     "/",
-	},
-	{
-		name: "invalid-end-date",
-		postedData: url.Values{
-			"start_date": {"2050-01-01"},
-			"end_date":   {"end"},
-			"first_name": {"John"},
-			"last_name":  {"Smith"},
-			"email":      {"john@smith.com"},
-			"phone":      {"555-555-5555"},
-			"room_id":    {"1"},
-		},
-		expectedResponseCode: http.StatusSeeOther,
-		expectedHTML:         "",
-		expectedLocation:     "/",
-	},
-	{
-		name: "invalid-room-id",
-		postedData: url.Values{
-			"start_date": {"2050-01-01"},
-			"end_date":   {"2050-01-02"},
-			"first_name": {"John"},
-			"last_name":  {"Smith"},
-			"email":      {"john@smith.com"},
-			"phone":      {"555-555-5555"},
-			"room_id":    {"invalid"},
-		},
-		expectedResponseCode: http.StatusSeeOther,
-		expectedHTML:         "",
-		expectedLocation:     "/",
-	},
-	{
 		name: "invalid-data",
+		reservation: models.Reservation{
+			RoomID:    1,
+			StartDate: time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2050, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
 		postedData: url.Values{
-			"start_date": {"2050-01-01"},
-			"end_date":   {"2050-01-02"},
 			"first_name": {"J"},
 			"last_name":  {"Smith"},
 			"email":      {"john@smith.com"},
 			"phone":      {"555-555-5555"},
-			"room_id":    {"1"},
 		},
 		expectedResponseCode: http.StatusOK,
-		expectedHTML:         `action="/make-reservation"`,
+		expectedHTML:         "Make Reservation",
 		expectedLocation:     "",
 	},
 	{
 		name: "database-insert-fails-reservation",
+		reservation: models.Reservation{
+			RoomID:    2,
+			StartDate: time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2050, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
 		postedData: url.Values{
-			"start_date": {"2050-01-01"},
-			"end_date":   {"2050-01-02"},
 			"first_name": {"John"},
 			"last_name":  {"Smith"},
 			"email":      {"john@smith.com"},
 			"phone":      {"555-555-5555"},
-			"room_id":    {"2"},
 		},
 		expectedResponseCode: http.StatusSeeOther,
 		expectedHTML:         "",
@@ -251,14 +221,16 @@ var postReservationTests = []struct {
 	},
 	{
 		name: "database-insert-fails-restriction",
+		reservation: models.Reservation{
+			RoomID:    1000,
+			StartDate: time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC),
+			EndDate:   time.Date(2050, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
 		postedData: url.Values{
-			"start_date": {"2050-01-01"},
-			"end_date":   {"2050-01-02"},
 			"first_name": {"John"},
 			"last_name":  {"Smith"},
 			"email":      {"john@smith.com"},
 			"phone":      {"555-555-5555"},
-			"room_id":    {"1000"},
 		},
 		expectedResponseCode: http.StatusSeeOther,
 		expectedHTML:         "",
@@ -279,6 +251,10 @@ func TestPostReservation(t *testing.T) {
 		ctx := getCtx(req)
 		req = req.WithContext(ctx)
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		if e.reservation.RoomID > 0 {
+			session.Put(ctx, "reservation", e.reservation)
+		}
 
 		rr := httptest.NewRecorder()
 
@@ -642,10 +618,13 @@ func TestBookRoom(t *testing.T) {
 	}
 }
 
-// loginTests is the data for the Login handler tests
+// loginTests is the data for the Login handler tests. PostLogin only ever
+// does two things: authenticate and redirect to /admin/dashboard, or fail
+// and redirect back to /login - it has no separate "re-render form" branch.
 var loginTests = []struct {
 	name               string
 	email              string
+	password           string
 	expectedStatusCode int
 	expectedHTML       string
 	expectedLocation   string
@@ -653,23 +632,26 @@ var loginTests = []struct {
 	{
 		"valid-credentials",
 		"me@here.ca",
+		"password",
 		http.StatusSeeOther,
 		"",
-		"/",
+		"/admin/dashboard",
 	},
 	{
 		"invalid-credentials",
 		"jack@nimble.com",
+		"password",
 		http.StatusSeeOther,
 		"",
-		"/user/login",
+		"/login",
 	},
 	{
-		"invalid-data",
-		"j",
-		http.StatusOK,
-		`action="/user/login"`,
+		"invalid-password",
+		"me@here.ca",
+		"wrong-password",
+		http.StatusSeeOther,
 		"",
+		"/login",
 	},
 }
 
@@ -678,10 +660,10 @@ func TestLogin(t *testing.T) {
 	for _, e := range loginTests {
 		postedData := url.Values{}
 		postedData.Add("email", e.email)
-		postedData.Add("password", "password")
+		postedData.Add("password", e.password)
 
 		// create request
-		req, _ := http.NewRequest("POST", "/user/login", strings.NewReader(postedData.Encode()))
+		req, _ := http.NewRequest("POST", "/login", strings.NewReader(postedData.Encode()))
 		ctx := getCtx(req)
 		req = req.WithContext(ctx)
 

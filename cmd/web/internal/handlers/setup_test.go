@@ -23,13 +23,11 @@ import (
 
 var app config.AppConfig
 var session *scs.SessionManager
-var pathToTemplates = "./../../templates"
+var pathToTemplates = "./../../../../templates"
 
 var functions = template.FuncMap{
-	"humanDate":  render.HumanDate,
-	"formatDate": render.FormatDate,
-	"iterate":    render.Iterate,
-	"add":        render.Add,
+	"humanDate": func(t time.Time) string { return t.Format("2006-01-02") },
+	"isoDate":   func(t time.Time) string { return t.Format("2006-01-02") },
 }
 
 func TestMain(m *testing.M) {
@@ -70,8 +68,7 @@ func TestMain(m *testing.M) {
 	app.TemplateCache = tc
 	app.UseCache = true
 
-	repo := NewTestRepo(&app)
-	NewHandlers(repo)
+	Repo = NewTestRepo(&app)
 	render.NewRenderer(&app)
 
 	os.Exit(m.Run())

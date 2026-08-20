@@ -53,6 +53,79 @@ func (m *postgresDBRepo) InsertReservation(res models.Reservation) (int, error) 
 	return newID, nil
 }
 
+// CreateReservation inserts a reservation and its room restriction in a single
+// transaction, checking availability against room_restrictions (the same
+// table used by the availability search) so a booking can't be accepted while
+// leaving an orphaned reservation if the restriction insert fails.
+func (m *postgresDBRepo) CreateReservation(res models.Reservation, restrictionID int) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	tx, err := m.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	var numRows int
+	err = tx.QueryRowContext(ctx, `
+		select count(id)
+		from room_restrictions
+		where room_id = $1
+		and $2 < end_date and $3 > start_date`,
+		res.RoomID, res.StartDate, res.EndDate,
+	).Scan(&numRows)
+	if err != nil {
+		return 0, err
+	}
+	if numRows > 0 {
+		return 0, errors.New("room is already booked for the selected dates")
+	}
+
+	var newID int
+	insertReservation := `insert into reservations (first_name, last_name, email, phone, start_date,
+			end_date, room_id, created_at, updated_at)
+			values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`
+
+	err = tx.QueryRowContext(ctx, insertReservation,
+		res.FirstName,
+		res.LastName,
+		res.Email,
+		res.Phone,
+		res.StartDate,
+		res.EndDate,
+		res.RoomID,
+		time.Now(),
+		time.Now(),
+	).Scan(&newID)
+	if err != nil {
+		return 0, err
+	}
+
+	insertRestriction := `insert into room_restrictions (start_date, end_date, room_id, reservation_id,
+			created_at, updated_at, restriction_id)
+			values ($1, $2, $3, $4, $5, $6, $7)`
+
+	_, err = tx.ExecContext(ctx, insertRestriction,
+		res.StartDate,
+		res.EndDate,
+		res.RoomID,
+		newID,
+		time.Now(),
+		time.Now(),
+		restrictionID,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+
+	return newID, nil
+}
+
 // InsertRoomRestriction inserts a room restriction into the database
 func (m *postgresDBRepo) InsertRoomRestriction(r models.RoomRestriction) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -217,7 +290,7 @@ func (m *postgresDBRepo) UpdateUser(u models.User) error {
 		u.FirstName,
 		u.LastName,
 		u.Email,
-		u.AccessLevel,
+		u.Password,
 		time.Now(),
 		u.ID,
 	)

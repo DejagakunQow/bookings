@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -9,17 +8,9 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-func _(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Hit the page")
-		next.ServeHTTP(w, r)
-	})
-}
-
 // NoSurf	adds CSRF protection to all POST requests
 func NoSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
-	csrfHandler.ExemptPath("/admin/calendar/save")
 
 	csrfHandler.SetBaseCookie(http.Cookie{
 		HttpOnly: true,

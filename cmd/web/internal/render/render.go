@@ -8,6 +8,7 @@ import (
 
 	"github.com/DejagakunQow/bookings/cmd/web/internal/config"
 	"github.com/DejagakunQow/bookings/cmd/web/internal/models"
+	"github.com/justinas/nosurf"
 )
 
 func humanDate(t time.Time) string {
@@ -26,8 +27,11 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 		td = &models.TemplateData{}
 	}
 
-	// FORCE admin visibility (temporary)
-	td.IsAuthenticated = true
+	td.IsAuthenticated = App.Session.Exists(r.Context(), "user_id")
+	td.CSRFToken = nosurf.Token(r)
+	td.Flash = App.Session.PopString(r.Context(), "flash")
+	td.Warning = App.Session.PopString(r.Context(), "warning")
+	td.Error = App.Session.PopString(r.Context(), "error")
 
 	return td
 }
