@@ -10,3 +10,6 @@ cmd/web/web
 # Secrets — never commit real credentials
 .env
 .env.local
+
+# Local runtime logs
+server.log
