@@ -9,6 +9,6 @@ test:
   pool: 5
 
 production:
-  url: {{envOr "DATABASE_URL" "postgres://postgres:CHANGE_ME@127.0.0.1:5432/booking_production?sslmode=disable"}}
+  url: {{envOr "DATABASE_URL" ""}}
   dialect: postgres
   pool: 5
